@@ -1,0 +1,14 @@
+name = "my-mvp"
+compatibility_date = "2025-02-23"
+
+[pages]
+build_output_dir = "out"  # Points to the Next.js static export directory
+
+#[site]
+# Optional: If you have static assets in a public directory, specify it here
+# bucket = "./public"
+
+# Proxy rules to route /api/vote requests to the external voting-app Worker
+[[pages.routes]]
+pattern = "/api/vote*"
+custom_domain = "voting-app.hackerinverse.workers.dev"
