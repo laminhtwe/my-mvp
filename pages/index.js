@@ -1,7 +1,9 @@
 import React from 'react';
-import PollUI from '../src/PollUI';
 import theme from '../src/theme';
 import { ThemeProvider } from '@mui/material/styles';
+import dynamic from 'next/dynamic';
+
+const PollUI = dynamic(() => import('../src/PollUI'), { ssr: false });
 
 const Index = () => {
   return (

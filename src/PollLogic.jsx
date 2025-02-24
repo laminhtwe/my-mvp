@@ -1,9 +1,6 @@
-// src/PollLogic.jsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-const VOTE_API_URL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:8787/api/vote/post'
-  : 'https://voting-app.hackerinverse.workers.dev/api/vote/post';
+const VOTE_API_URL = '/api/vote/post'; // Relative path for Pages Functions
 
 export const PollLogic = ({ onVoteUpdate }) => {
   const [votes, setVotes] = useState({});
@@ -11,13 +8,17 @@ export const PollLogic = ({ onVoteUpdate }) => {
 
   const fetchVoteCount = async (vote) => {
     try {
+      console.log(`Fetching count for ${vote} from ${VOTE_API_URL}?vote=${vote}`);
       const response = await fetch(`${VOTE_API_URL}?vote=${vote}`, {
-        method: 'GET',
+        method: 'GET', // Remove headers for GET unless needed
       });
+      if (response.status === 405) {
+        console.error(`405 Method Not Allowed for ${vote}: ${response.statusText}`);
+        throw new Error('Method not allowed');
+      }
       if (!response.ok) throw new Error(`Failed to fetch vote count for ${vote}: ${response.status} ${response.statusText}`);
-      console.log(`Fetched count for ${vote}: ${response.status} ${response.statusText}`); // Debug log
       const data = await response.json();
-      console.log(`Fetched count for ${vote}: ${data.count}`); // Debug log
+      console.log(`Fetched count for ${vote}: ${data.count}`);
       setVotes((prev) => ({ ...prev, [vote]: data.count }));
       onVoteUpdate?.({ vote, count: data.count });
       return data.count;
@@ -30,15 +31,20 @@ export const PollLogic = ({ onVoteUpdate }) => {
 
   const castVote = async (vote) => {
     try {
+      console.log(`Casting vote for ${vote} to ${VOTE_API_URL}`);
       const response = await fetch(VOTE_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vote }),
       });
+      if (response.status === 405) {
+        console.error(`405 Method Not Allowed for ${vote}: ${response.statusText}`);
+        throw new Error('Method not allowed');
+      }
       if (!response.ok) throw new Error(`Failed to cast vote for ${vote}: ${response.status} ${response.statusText}`);
-      console.log(`Vote cast response for ${vote}: ${await response.text()}`); // Debug log
+      console.log(`Vote cast response for ${vote}: ${await response.text()}`);
       const data = await response.json();
-      await fetchVoteCount(vote); // Update the count after voting
+      await fetchVoteCount(vote); // Fetch count after voting
       return data;
     } catch (err) {
       setError(err.message);
@@ -46,19 +52,6 @@ export const PollLogic = ({ onVoteUpdate }) => {
       return null;
     }
   };
-
-  // Optional: Remove or delay initial fetch
-  // useEffect(() => {
-  //   const fetchInitialCounts = async () => {
-  //     const initialVotes = {};
-  //     for (const option of ['A', 'B', 'C', 'D']) {
-  //       const count = await fetchVoteCount(option);
-  //       initialVotes[option] = count;
-  //     }
-  //     setVotes(initialVotes);
-  //   };
-  //   fetchInitialCounts();
-  // }, [fetchVoteCount]);
 
   return { votes, castVote, error };
 };

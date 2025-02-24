@@ -1,5 +1,4 @@
-// src/PollUI.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import { Box, Button, Typography, LinearProgress } from '@mui/material';
 import { PollLogic } from './PollLogic';
@@ -7,18 +6,18 @@ import { pollData } from './PollData';
 import { useTheme } from '@mui/material/styles';
 
 const PollContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: theme.palette.background.default || '#f5f5f5', // Fallback color
   padding: '2rem',
   borderRadius: '8px',
   maxWidth: '500px',
   margin: '0 auto',
-  color: theme.palette.text.primary,
+  color: theme.palette.text.primary || '#333',
 }));
 
 const Option = styled(Box)(({ theme }) => ({
   padding: '1rem',
   marginBottom: '0.5rem',
-  backgroundColor: theme.palette.background.paper,
+  backgroundColor: theme.palette.background.paper || '#fff',
   borderRadius: '4px',
   display: 'flex',
   justifyContent: 'space-between',
@@ -26,7 +25,7 @@ const Option = styled(Box)(({ theme }) => ({
 }));
 
 const VoteButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.custom.purpureus,
+  backgroundColor: theme.palette.custom?.purpureus || '#9B5DE5', // Fallback purple
   color: '#ffffff',
   '&:hover': {
     backgroundColor: '#8a3a85',
@@ -36,21 +35,29 @@ const VoteButton = styled(Button)(({ theme }) => ({
 }));
 
 const PollUI = () => {
-  const theme = useTheme();
+  const theme = useTheme() || { palette: { background: { default: '#f5f5f5', paper: '#fff' }, text: { primary: '#333' }, custom: { purpureus: '#9B5DE5', lightGreen: '#00BB7E', gunmetal: '#2D3E50' } } };
   const { votes, castVote, error } = PollLogic({
     onVoteUpdate: (voteData) => {
       console.log('Vote updated in UI:', voteData);
+      console.log('onVoteUpdate called');
     },
   });
 
   useEffect(() => {
-    console.log('Votes state updated:', votes); // Debug log to track changes
+    if (typeof window !== 'undefined') {
+      console.log('Votes state updated:', votes);
+    }
   }, [votes]);
 
-  const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0) || 1; // Avoid division by zero
+  const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0) || 1;
 
   const handleVote = async (vote) => {
-    await castVote(vote);
+    try {
+      await castVote(vote);
+    } catch (err) {
+      console.error('Error voting:', err);
+      setError?.(err.message); // If PollLogic passes setError via props or update state
+    }
   };
 
   return (
@@ -67,7 +74,7 @@ const PollUI = () => {
               <Typography variant="body1">
                 {option.label}
               </Typography>
-              <Typography variant="caption" color={theme.palette.custom.lightGreen}>
+              <Typography variant="caption" color={theme.palette.custom?.lightGreen || '#00BB7E'}>
                 {count} votes, {percentage}%
               </Typography>
             </Box>
@@ -76,9 +83,9 @@ const PollUI = () => {
               value={percentage}
               sx={{
                 width: '200px',
-                backgroundColor: theme.palette.custom.gunmetal,
+                backgroundColor: theme.palette.custom?.gunmetal || '#2D3E50',
                 '& .MuiLinearProgress-bar': {
-                  backgroundColor: theme.palette.custom.purpureus,
+                  backgroundColor: theme.palette.custom?.purpureus || '#9B5DE5',
                 },
               }}
             />
