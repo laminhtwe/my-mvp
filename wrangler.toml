@@ -7,5 +7,3 @@ pages_build_output_dir = "out"
 # Optional: If you have static assets in a public directory
 # bucket = "./public"
 
-[build]
-node_version = "22.14.0"

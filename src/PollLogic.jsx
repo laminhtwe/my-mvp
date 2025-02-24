@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const VOTE_API_URL = 'https://mutuist.com/api/vote'; //  path for  Functions
+const VOTE_API_URL = 'https://voting.mutuist.com/api/vote/post'; // Updated path for casting votes
 
 export const PollLogic = ({ onVoteUpdate }) => {
   const [votes, setVotes] = useState({});
@@ -23,8 +23,8 @@ export const PollLogic = ({ onVoteUpdate }) => {
       onVoteUpdate?.({ vote, count: data.count });
       return data.count;
     } catch (err) {
-      setError(err.message);
       console.error('Error fetching vote count:', err);
+      setError(err.message);
       return 0; // Default to 0 if Worker fails, keeping UI static
     }
   };
@@ -47,8 +47,8 @@ export const PollLogic = ({ onVoteUpdate }) => {
       await fetchVoteCount(vote); // Fetch count after voting
       return data;
     } catch (err) {
-      setError(err.message);
       console.error('Error casting vote:', err);
+      setError(err.message);
       return null;
     }
   };
