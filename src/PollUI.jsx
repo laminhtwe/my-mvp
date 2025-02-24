@@ -38,8 +38,14 @@ const VoteButton = styled(Button)(({ theme }) => ({
 const PollUI = () => {
   const theme = useTheme();
   const { votes, castVote, error } = PollLogic({
-    onVoteUpdate: (voteData) => console.log('Vote updated:', voteData),
+    onVoteUpdate: (voteData) => {
+      console.log('Vote updated in UI:', voteData);
+    },
   });
+
+  useEffect(() => {
+    console.log('Votes state updated:', votes); // Debug log to track changes
+  }, [votes]);
 
   const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0) || 1; // Avoid division by zero
 
