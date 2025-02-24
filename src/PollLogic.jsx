@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const VOTE_API_URL = '/api/vote/post'; // Relative path for Pages Functions
+const VOTE_API_URL = 'https://mutuist.com/api/vote'; //  path for  Functions
 
 export const PollLogic = ({ onVoteUpdate }) => {
   const [votes, setVotes] = useState({});
