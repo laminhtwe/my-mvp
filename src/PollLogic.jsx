@@ -42,7 +42,6 @@ export const PollLogic = ({ onVoteUpdate }) => {
         throw new Error('Method not allowed');
       }
       if (!response.ok) throw new Error(`Failed to cast vote for ${vote}: ${response.status} ${response.statusText}`);
-      console.log(`Vote cast response for ${vote}: ${await response.text()}`);
       const data = await response.json();
       await fetchVoteCount(vote); // Fetch count after voting
       return data;

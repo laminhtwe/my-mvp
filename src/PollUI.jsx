@@ -49,7 +49,7 @@ const PollUI = () => {
     }
   }, [votes]);
 
-  const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0) || 1;
+  const totalVotes = Object.values(votes).reduce((sum, count) => sum + Number(count), 0) || 1;
 
   const handleVote = async (vote) => {
     try {
