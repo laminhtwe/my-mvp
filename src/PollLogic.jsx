@@ -8,8 +8,8 @@ export const PollLogic = ({ onVoteUpdate }) => {
 
   const fetchVoteCount = async (vote) => {
     try {
-      console.log(`Fetching count for ${vote} from ${VOTE_API_URL}?vote=${vote}`);
-      const response = await fetch(`${VOTE_API_URL}?vote=${vote}`, {
+      console.log(`Fetching count for ${vote} from ${VOTE_API_URL}`);
+      const response = await fetch(VOTE_API_URL, { // Modified URL
         method: 'GET', // Remove headers for GET unless needed
       });
       if (response.status === 405) {
@@ -18,10 +18,10 @@ export const PollLogic = ({ onVoteUpdate }) => {
       }
       if (!response.ok) throw new Error(`Failed to fetch vote count for ${vote}: ${response.status} ${response.statusText}`);
       const data = await response.json();
-      console.log(`Fetched count for ${vote}: ${data.count}`);
-      setVotes((prev) => ({ ...prev, [vote]: data.count }));
-      onVoteUpdate?.({ vote, count: data.count });
-      return data.count;
+      console.log(`Fetched count for ${vote}: ${data[vote]}`); // Modified data access
+      setVotes((prev) => ({ ...prev, [vote]: data[vote] })); // Modified data access
+      onVoteUpdate?.({ vote, count: data[vote] }); // Modified data access
+      return data[vote]; // Modified data access
     } catch (err) {
       console.error('Error fetching vote count:', err);
       setError(err.message);

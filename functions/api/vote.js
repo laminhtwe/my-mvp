@@ -37,7 +37,8 @@ export async function onRequest(context) {
 
       const data = await backendResponse.json();
 
-      const response = new Response(JSON.stringify(data), {
+      const responseData = { ...data, vote };
+      const response = new Response(JSON.stringify(responseData), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*', // Allow any origin
