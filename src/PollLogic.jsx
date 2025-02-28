@@ -1,10 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const VOTE_API_URL = 'https://voting.mutuist.com/api/vote/post'; // Updated path for casting votes
+const VOTE_API_URL = 'https://voting.mutuist.com/api/vote/post';
 
 export const PollLogic = ({ onVoteUpdate }) => {
   const [votes, setVotes] = useState({});
   const [error, setError] = useState(null);
+
+  const fetchTotalVotes = async () => {
+    try {
+      const response = await fetch(VOTE_API_URL);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch total votes: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      // Convert string values to number
+      const parsedVotes = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [key, Number(value)])
+      );
+      setVotes(parsedVotes);
+    } catch (err) {
+      console.error('Error fetching total votes:', err);
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchTotalVotes();
+  }, []);
 
   const fetchVoteCount = async (vote) => {
     try {

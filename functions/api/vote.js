@@ -13,55 +13,44 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const endpoint = url.pathname;
 
-  if (endpoint.startsWith('/api/vote/')) {
-    try {
-      // Extract the vote from the request body
-      const requestBody = await request.json();
-      const vote = requestBody.vote;
+  const backendURL = 'https://voting.mutuist.com/api/vote/post';
 
-      // Construct the backend URL
-      const backendURL = `https://voting-app.hackerinverse.workers.dev${endpoint}`;
-
-      // Forward the request to the backend
-      const backendResponse = await fetch(backendURL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ vote })
-      });
-
-      if (!backendResponse.ok) {
-        throw new Error(`Backend responded with ${backendResponse.status}`);
-      }
-
-      const data = await backendResponse.json();
-
-      const responseData = { ...data, vote };
-      const response = new Response(JSON.stringify(responseData), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*', // Allow any origin
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', // Allow these methods
-          'Access-Control-Allow-Headers': 'Content-Type', // Allow these headers
-        },
-      });
-
-      return response;
-    } catch (error) {
-      const errorResponse = { error: error.message };
-      return new Response(JSON.stringify(errorResponse), {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        },
-      });
+  try {
+    let requestBody = null;
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      requestBody = await request.text();
     }
-  } else {
-    // Handle other requests
-    return new Response('Not Found', { status: 404 });
+
+    // Forward the request to the backend
+    const backendResponse = await fetch(backendURL, {
+      method: request.method,
+      headers: request.headers,
+      body: requestBody,
+    });
+
+    if (!backendResponse.ok) {
+      throw new Error(`Backend responded with ${backendResponse.status}`);
+    }
+
+    // Clone the response so that it's no longer immutable
+    const newResponse = new Response(backendResponse.body, backendResponse);
+
+    // Set CORS headers
+    newResponse.headers.set('Access-Control-Allow-Origin', '*');
+    newResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    newResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    return newResponse;
+  } catch (error) {
+    const errorResponse = { error: error.message };
+    return new Response(JSON.stringify(errorResponse), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }
+    });
   }
 }
